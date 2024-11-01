@@ -1,0 +1,30 @@
+version: '3'
+services:
+  mysql:
+    container_name: mysql-psn
+    image: mysql
+    ports:
+      - "1433:1433"
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: picture_sharing_network
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 12345
+    volumes:
+      - psn_data:/var/lib/mysql
+    networks:
+      - spring-psn
+    restart: unless-stopped
+  mail-dev:
+    container_name: mail-dev-psn
+    image: maildev/maildev
+    ports:
+      - 1080:1080
+      - 1025:1025
+
+networks:
+  spring-psn:
+    driver: bridge
+volumes:
+  psn_data:
+    driver: local
