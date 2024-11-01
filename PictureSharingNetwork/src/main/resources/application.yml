@@ -35,3 +35,9 @@ spring:
 server:
   servlet:
     context-path: /api/v1/
+  port: 8088
+jwt:
+  expiration: 2592000
+  secret-key: TaqlmGv1iEDMRiFp/pHuID1+T84IABfuA0xXh4GhiUI=
+api:
+  prefix: api/v1

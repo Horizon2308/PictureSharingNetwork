@@ -42,6 +42,10 @@ public class User extends BaseEntity implements UserDetails {
     @Column(length = 500)
     private String moreAboutMe;
 
+    private boolean accountLooked;
+
+    private boolean enable;
+
     @ManyToOne
     @JoinColumn(name = "role_id")
     private Role role;
