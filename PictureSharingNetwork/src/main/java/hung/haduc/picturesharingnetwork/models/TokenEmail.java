@@ -31,4 +31,8 @@ public class TokenEmail {
     private LocalDateTime expiredAt;
 
     private LocalDateTime validatedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "userId")
+    private User userId;
 }

@@ -13,7 +13,6 @@ import java.util.List;
 
 @Getter
 @Setter
-@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -45,6 +44,10 @@ public class User extends BaseEntity implements UserDetails {
     private boolean accountLooked;
 
     private boolean enable;
+
+    private String googleAccountId;
+
+    private String facebookAccountId;
 
     @ManyToOne
     @JoinColumn(name = "role_id")

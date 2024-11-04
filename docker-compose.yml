@@ -1,15 +1,13 @@
-version: '3'
+
 services:
   mysql:
     container_name: mysql-psn
     image: mysql
     ports:
-      - "1433:1433"
+      - 3308:3306
     environment:
-      MYSQL_ROOT_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: "12345"
       MYSQL_DATABASE: picture_sharing_network
-      MYSQL_USER: root
-      MYSQL_PASSWORD: 12345
     volumes:
       - psn_data:/var/lib/mysql
     networks:

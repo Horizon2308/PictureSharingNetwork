@@ -15,8 +15,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @MappedSuperclass
-@EntityListeners(AuditingEntityListener.class)
 //Create base class to prevent duplicated code
+@EntityListeners(AuditingEntityListener.class)
 public class BaseEntity {
 
     @CreatedDate

@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AuthenticationDTO {
+public class AuthenticationDTO extends SocialAccountDTO {
 
     @NotEmpty(message = "Full name can't be empty")
     @Size(min = 3, max = 30, message = "Full name must be between 3 to 30")
@@ -30,10 +30,12 @@ public class AuthenticationDTO {
 
     private String avatar;
 
+    @JsonProperty("more_about_me")
     private String moreAboutMe;
 
     @NotEmpty(message = "Nickname can't be empty")
     @Size(min = 3, max = 30, message = "Nickname must be between 3 to 30")
+    @JsonProperty("nick_name")
     private String nickName;
 
 }
