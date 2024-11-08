@@ -49,6 +49,15 @@ public class WebSecurityConfig {
                             .requestMatchers(HttpMethod.POST,
                                     String.format("%s/auth/register", apiPrefix)).permitAll()
 
+                            .requestMatchers(HttpMethod.GET,
+                                    String.format("%s/auth/activate-account", apiPrefix)).permitAll()
+
+                            .requestMatchers(HttpMethod.POST,
+                                    String.format("%s/auth/forgot-password", apiPrefix)).permitAll()
+
+                            .requestMatchers(HttpMethod.POST,
+                                    String.format("%s/auth/change-password", apiPrefix)).permitAll()
+
                             .anyRequest().authenticated();
                 })
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

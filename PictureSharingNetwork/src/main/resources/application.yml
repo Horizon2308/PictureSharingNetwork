@@ -20,8 +20,6 @@ spring:
   mail:
     host: localhost
     port: 1025
-    username: root
-    password: 2308
     properties:
       mail:
         smtp:
@@ -36,10 +34,11 @@ server:
   port: 8088
 jwt:
   expiration: 2592000
+  expiration-refresh-token: 5184000
   secret-key: TaqlmGv1iEDMRiFp/pHuID1+T84IABfuA0xXh4GhiUI=
 api:
   prefix: api/v1
 application:
   contact: hdh23.work@gmail.com
   font-end:
-    confimation-url: http://localhost:4200/activate-account
+    confirmation-url: http://localhost:4200/activate-account

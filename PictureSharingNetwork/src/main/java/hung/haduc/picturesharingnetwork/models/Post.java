@@ -31,6 +31,8 @@ public class Post extends BaseEntity {
 
     private int shareFor;
 
+    private String thumbnail;
+
     private Long likes;
 
     private Long comments;

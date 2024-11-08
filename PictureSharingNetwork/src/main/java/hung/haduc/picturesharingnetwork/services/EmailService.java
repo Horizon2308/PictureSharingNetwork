@@ -30,7 +30,7 @@ public class EmailService {
     public void sendMail(
             String to,
             String fullName,
-            EmailTemplateName emailTemplateName,
+            String emailTemplateName,
             String confirmationUrl,
             String activationCode,
             String subject
@@ -39,7 +39,7 @@ public class EmailService {
         if (emailTemplateName == null) {
             templateName = "confirm-email";
         } else {
-            templateName = emailTemplateName.name();
+            templateName = emailTemplateName;
         }
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(
@@ -51,6 +51,44 @@ public class EmailService {
         properties.put("fullName", fullName);
         properties.put("confirmationUrl", confirmationUrl);
         properties.put("activation_code", activationCode);
+
+        Context context = new Context();
+        context.setVariables(properties);
+
+        mimeMessageHelper.setFrom(this.contact);
+        mimeMessageHelper.setTo(to);
+        mimeMessageHelper.setSubject(subject);
+
+        String template = templateEngine.process(templateName, context);
+
+        mimeMessageHelper.setText(template, true);
+
+        javaMailSender.send(mimeMessage);
+    }
+
+    @Async
+    public void sendNewPassword(
+            String to,
+            String fullName,
+            String emailTemplateName,
+            String newPassword,
+            String subject
+    ) throws MessagingException {
+        String templateName;
+        if (emailTemplateName == null) {
+            templateName = "confirm-email";
+        } else {
+            templateName = emailTemplateName;
+        }
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(
+                mimeMessage,
+                MimeMessageHelper.MULTIPART_MODE_MIXED,
+                StandardCharsets.UTF_8.name()
+        );
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("fullName", fullName);
+        properties.put("new_password", newPassword);
 
         Context context = new Context();
         context.setVariables(properties);
