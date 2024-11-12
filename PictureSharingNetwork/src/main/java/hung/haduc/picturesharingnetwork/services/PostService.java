@@ -6,13 +6,15 @@ import hung.haduc.picturesharingnetwork.models.Post;
 import hung.haduc.picturesharingnetwork.models.User;
 import hung.haduc.picturesharingnetwork.repositories.PostRepository;
 import hung.haduc.picturesharingnetwork.repositories.UserRepository;
+import hung.haduc.picturesharingnetwork.responses.PostDetailResponse;
 import hung.haduc.picturesharingnetwork.responses.PostResponse;
+import hung.haduc.picturesharingnetwork.utilities.CurrentUser;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -23,53 +25,99 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final CurrentUser currentUser;
 
 
-    public List<PostResponse> getAllPostsFollowed(Integer sortOption,
+    public Page<PostResponse> getAllPostsFollowed(Integer sortOption,
                                                   String keyword,
                                                   Integer page,
                                                   Integer limit)
             throws DataNotFoundException {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = userRepository.findUserByEmail(authentication.getName())
-                .orElseThrow(() -> new DataNotFoundException("User not found !"));
+        User user = currentUser.getCurrentUser();
         return postRepository
                 .searchPostsByFollowedUser(keyword,
                         user.getId(),
                         PageRequest.of(page, limit, this.getSortOption(sortOption)))
-                .stream()
-                .map(post -> this.convertPostToPostResponse(post, user))
-                .toList();
+                .map(post -> {
+                    try {
+                        return this.convertPostToPostResponse(post);
+                    } catch (DataNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
     }
 
-    public List<PostResponse> getAllPostsByUserId(Integer sortOption,
-                                              String keyword,
-                                              Long userId,
-                                              Integer page,
-                                              Integer limit)
+    public Page<PostResponse> getAllPostsByUserId(Integer sortOption,
+                                    String keyword,
+                                    Long userId,
+                                    Integer page,
+                                    Integer limit)
             throws DataNotFoundException {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = userRepository.findUserByEmail(authentication.getName())
-                .orElseThrow(() -> new DataNotFoundException("User not found !"));
+        User user = currentUser.getCurrentUser();
         if (Objects.equals(userId, user.getId())) {
             return postRepository
                     .searchPostsForOwnProfileUser(keyword,
                             userId,
                             PageRequest.of(page, limit, this.getSortOption(sortOption)))
-                    .map(post -> this.convertPostToPostResponse(post, user))
-                    .toList();
+                    .map(post -> {
+                        try {
+                            return this.convertPostToPostResponse(post);
+                        } catch (DataNotFoundException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
         } else {
             return postRepository
                     .searchPostsByUserId(keyword,
                             userId,
                             PageRequest.of(page, limit, this.getSortOption(sortOption)))
-                    .map(post -> this.convertPostToPostResponse(post, user))
-                    .toList();
+                    .map(post -> {
+                        try {
+                            return this.convertPostToPostResponse(post);
+                        } catch (DataNotFoundException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
         }
     }
 
-    public void createPost(PostDTO postDTO) throws DataNotFoundException {
-        postRepository.save(this.convertPostDTOToPost(postDTO));
+    @Transactional
+    public PostResponse createPost(PostDTO postDTO) throws DataNotFoundException {
+        return convertPostToPostResponse(postRepository.save(this.convertPostDTOToPost(postDTO)));
+    }
+
+    public PostDetailResponse getPostDetails(Long postId) throws DataNotFoundException {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new DataNotFoundException("Post not found !"));
+        return PostDetailResponse.builder()
+                .postImages(post.getPostImages())
+                .comments(post.getComments())
+                .description(post.getDescription())
+                .likes(post.getLikes())
+                .location(post.getLocation())
+                .tag(post.getTag())
+                .thumbnail(post.getThumbnail())
+                .title(post.getTitle())
+                .build();
+    }
+
+    @Transactional
+    public void updatePost(Long id, PostDTO postDTO) throws DataNotFoundException {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException("Post not found !"));
+        post.setDescription(postDTO.getDescription());
+        post.setLocation(postDTO.getLocation());
+        post.setShareFor(postDTO.getShareFor());
+        post.setTag(postDTO.getTag());
+        post.setTitle(postDTO.getTitle());
+        postRepository.save(post);
+    }
+
+    @Transactional
+    public void deletePost(Long id) throws DataNotFoundException {
+        Post deletedPost = postRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException("Post not found !"));
+        postRepository.delete(deletedPost);
     }
 
     private Sort getSortOption(Integer sortOption) {
@@ -91,9 +139,7 @@ public class PostService {
 
 
     private Post convertPostDTOToPost(PostDTO postDTO) throws DataNotFoundException {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = userRepository.findUserByEmail(authentication.getName())
-                .orElseThrow(() -> new DataNotFoundException("User not found !"));
+        User user = currentUser.getCurrentUser();
         return Post.builder()
                 .comments(0L)
                 .description(postDTO.getDescription())
@@ -106,8 +152,10 @@ public class PostService {
                 .build();
     }
 
-    private PostResponse convertPostToPostResponse(Post post, User user) {
+    private PostResponse convertPostToPostResponse(Post post) throws DataNotFoundException {
+        User user = currentUser.getCurrentUser();
         return PostResponse.builder()
+                .id(post.getId())
                 .likes(post.getLikes())
                 .comments(post.getComments())
                 .tag(post.getTag())

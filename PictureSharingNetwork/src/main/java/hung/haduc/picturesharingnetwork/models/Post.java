@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -40,4 +42,9 @@ public class Post extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User userId;
+
+    @OneToMany(mappedBy = "post",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY)
+    private List<PostImage> postImages;
 }

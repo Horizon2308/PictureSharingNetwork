@@ -18,8 +18,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class FileUtilities {
 
-
-    private String storeFile(MultipartFile file) throws IOException {
+    public String storeFile(MultipartFile file) throws IOException {
         String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename())); // get the file name
         // append a random unique string to identify each images
         String uniqueFileName = UUID.randomUUID().toString() + "_" + fileName;

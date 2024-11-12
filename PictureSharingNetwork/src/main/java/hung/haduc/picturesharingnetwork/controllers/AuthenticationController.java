@@ -1,9 +1,8 @@
 package hung.haduc.picturesharingnetwork.controllers;
 
 import hung.haduc.picturesharingnetwork.dtos.AuthenticationDTO;
-import hung.haduc.picturesharingnetwork.exceptions.DataExistException;
+import hung.haduc.picturesharingnetwork.dtos.UserUpdateDTO;
 import hung.haduc.picturesharingnetwork.exceptions.DataNotFoundException;
-import hung.haduc.picturesharingnetwork.exceptions.InvalidParameterException;
 import hung.haduc.picturesharingnetwork.http_responses.ErrorResponse;
 import hung.haduc.picturesharingnetwork.http_responses.SuccessResponse;
 import hung.haduc.picturesharingnetwork.models.Token;
@@ -14,10 +13,8 @@ import hung.haduc.picturesharingnetwork.requests.LoginRequest;
 import hung.haduc.picturesharingnetwork.responses.LoginResponse;
 import hung.haduc.picturesharingnetwork.services.AuthenticationService;
 import hung.haduc.picturesharingnetwork.services.TokenService;
-import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -127,6 +124,27 @@ public class AuthenticationController {
             return ResponseEntity.badRequest().body(new ErrorResponse<>(e.getMessage()));
         }
     }
+
+    @PutMapping("/update-account")
+    public ResponseEntity<?> updateUser(@RequestBody UserUpdateDTO userUpdateDTO) {
+        try {
+            return ResponseEntity.ok().body(new SuccessResponse<>(authenticationService.updateUser(userUpdateDTO),
+                    "Updated account successfully !"));
+        } catch (DataNotFoundException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse<>(e.getMessage()));
+        }
+    }
+
+    @GetMapping("/locking-user")
+    public ResponseEntity<?> lockingUser() {
+        try {
+            authenticationService.lockingAccount();
+            return ResponseEntity.ok().body(new SuccessResponse<>("Locked account successfully !"));
+        } catch (DataNotFoundException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse<>(e.getMessage()));
+        }
+    }
+
 
     private boolean isMobileUser(String userAgent) {
         return userAgent.toLowerCase().contains("mobile");

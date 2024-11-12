@@ -1,6 +1,7 @@
 package hung.haduc.picturesharingnetwork.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,18 +12,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PostDTO {
+public class CommentDTO {
 
-    @NotEmpty(message = "Title must not be blank !")
-    private String title;
+    @NotEmpty(message = "Comment can not be empty !")
+    @Max(value = 500, message = "Maximum of comment text is 500 characters !")
+    private String text;
 
-    private String description;
-
-    private String location;
-
-    private String tag;
-
-    @JsonProperty("share_for")
-    private int shareFor;
+    @JsonProperty("parent_id")
+    private Long parentId;
 
 }

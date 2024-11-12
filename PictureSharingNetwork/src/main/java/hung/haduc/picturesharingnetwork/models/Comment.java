@@ -27,6 +27,10 @@ public class Comment extends BaseEntity {
     private Long likes;
 
     @ManyToOne
+    @JoinColumn(name = "post_id")
+    private Post post;
+
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User userId;
 

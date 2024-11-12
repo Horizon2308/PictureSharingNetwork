@@ -2,6 +2,7 @@ package hung.haduc.picturesharingnetwork.services;
 
 import hung.haduc.picturesharingnetwork.commons.EmailTemplateName;
 import hung.haduc.picturesharingnetwork.dtos.AuthenticationDTO;
+import hung.haduc.picturesharingnetwork.dtos.UserUpdateDTO;
 import hung.haduc.picturesharingnetwork.exceptions.DataExistException;
 import hung.haduc.picturesharingnetwork.exceptions.DataNotFoundException;
 import hung.haduc.picturesharingnetwork.exceptions.InvalidParameterException;
@@ -14,6 +15,8 @@ import hung.haduc.picturesharingnetwork.repositories.UserRepository;
 import hung.haduc.picturesharingnetwork.requests.ChangePasswordRequest;
 import hung.haduc.picturesharingnetwork.requests.ForgotPasswordRequest;
 import hung.haduc.picturesharingnetwork.requests.LoginRequest;
+import hung.haduc.picturesharingnetwork.responses.UserResponse;
+import hung.haduc.picturesharingnetwork.utilities.CurrentUser;
 import hung.haduc.picturesharingnetwork.utilities.JwtTokenUtilities;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +39,7 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final TokenEmailRepository tokenEmailRepository;
+    private final CurrentUser currentUser;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenUtilities jwtTokenUtilities;
 
@@ -71,10 +75,6 @@ public class AuthenticationService {
     }
 
     public String login(LoginRequest loginRequest) throws DataNotFoundException, InvalidParameterException {
-//        if ((loginRequest.getGoogleAccountId() != null && loginRequest.isGoogleAccountIdValid())
-//            && loginRequest.getFacebookAccountId() != null && loginRequest.isFacebookAccountIdValid()) {
-//
-//        }
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getEmail(),
@@ -159,6 +159,31 @@ public class AuthenticationService {
             user.setPassword(encodeNewPassword);
             userRepository.save(user);
         }
+    }
+
+    @Transactional
+    public UserResponse updateUser(UserUpdateDTO userUpdateDTO)
+            throws DataNotFoundException {
+        User updatedUser = currentUser.getCurrentUser();
+        updatedUser.setAvatar(userUpdateDTO.getAvatar());
+        updatedUser.setMoreAboutMe(userUpdateDTO.getMoreAboutMe());
+        updatedUser.setNickname(userUpdateDTO.getNickName());
+        User user = userRepository.save(updatedUser);
+        return UserResponse.builder()
+                .id(user.getId())
+                .nickName(user.getNickname())
+                .avatar(user.getAvatar())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .moreAboutMe(user.getMoreAboutMe())
+                .build();
+    }
+
+    @Transactional
+    public void lockingAccount() throws DataNotFoundException {
+        User user = currentUser.getCurrentUser();
+        user.setAccountLooked(true);
+        userRepository.save(user);
     }
 
     private void sendValidationEmail(User newUser) throws MessagingException {

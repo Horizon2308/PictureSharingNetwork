@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class PostResponse {
 
+    private Long id;
+
     private String tag;
 
     private Long likes;
